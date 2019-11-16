@@ -1,29 +1,25 @@
-#include "ili9341.h"
+#include "fosl/ili9341/base.h"
 
-namespace Lib
+namespace fosl
 {
 	namespace Ili9341
 	{
-		using namespace ILI9341;
-
-		// CONSTRUCTORS
 		Base::Base(uint16_t width, uint16_t height)
-			: m_width(width), m_height(height)
+			: width(width), height(height)
 		{
 		}
 
-		// SETTERS
-		void Base::rotation(ROTATION new_rotation)
+		void Base::set_rotation(ROTATION new_rotation)
 		{
 			static const uint8_t MY  = 0b10000000;
 			static const uint8_t MX  = 0b01000000;
 			static const uint8_t MV  = 0b00100000;
 			static const uint8_t BGR = 0b00001000;
 
-			m_rotation = new_rotation;
+			rotation = new_rotation;
 
 			send(COMMAND::MAC);
-			switch(m_rotation)
+			switch(rotation)
 			{
 				case ROTATION::PORTRAIT:
 					send(MY | BGR);
@@ -39,20 +35,20 @@ namespace Lib
 					break;
 			}
 		}
-		void Base::window_location(const Point& point0, const Point& point1)
+		void Base::set_window_location(const Point& point0, const Point& point1)
 		{
 			Point point_upper_left;
 			Point point_lower_right;
 
-			point_upper_left .x = MIN(point0.x, point0.x);
-			point_lower_right.x = MAX(point1.x, point1.x);
-			point_upper_left .y = MIN(point0.y, point0.y);
-			point_lower_right.y = MAX(point1.y, point1.y);
+			point_upper_left .x = MIN(point0.x, point1.x);
+			point_lower_right.x = MAX(point0.x, point1.x);
+			point_upper_left .y = MIN(point0.y, point1.y);
+			point_lower_right.y = MAX(point0.y, point1.y);
 
-			point_upper_left .x = MIN(point_upper_left .x, m_width  - 1);
-			point_lower_right.x = MIN(point_lower_right.x, m_width  - 1);
-			point_upper_left .y = MIN(point_upper_left .y, m_height - 1);
-			point_lower_right.y = MIN(point_lower_right.y, m_height - 1);
+			point_upper_left .x = MIN(point_upper_left .x, width  - 1);
+			point_lower_right.x = MIN(point_lower_right.x, width  - 1);
+			point_upper_left .y = MIN(point_upper_left .y, height - 1);
+			point_lower_right.y = MIN(point_lower_right.y, height - 1);
 
 			send(COMMAND::COLUMN_ADDR);
 			send(HIGH_BYTE(point_upper_left .x));
@@ -141,26 +137,26 @@ namespace Lib
 
 		void Base::pixel(const Point& point, Color color)
 		{
-			window_location(point, point);
+			set_window_location(point, point);
 			send(color);
 		}
 		void Base::fill(Color color)
 		{
-			uint32_t pixels_to_color = m_width * m_height;
+			uint32_t pixels_to_color = width * height;
 
-			switch (m_rotation)
+			switch (rotation)
 			{
 				case ROTATION::PORTRAIT:
 				case ROTATION::LANDSCAPE:
-					window_location(
-						Point { (uint16_t) (0          ), (uint16_t) (0           ) },
-						Point { (uint16_t) (m_width - 1), (uint16_t) (m_height - 1) });
+					set_window_location(
+						Point { (uint16_t) (0        ), (uint16_t) (0         ) },
+						Point { (uint16_t) (width - 1), (uint16_t) (height - 1) });
 					break;
 				case ROTATION::REVERSE_PORTRAIT:
 				case ROTATION::REVERSE_LANDSCAPE:
-					window_location(
-						Point { (uint16_t) (0          ), (uint16_t) (0         ) },
-						Point { (uint16_t) (m_height -1), (uint16_t) (m_width -1) });
+					set_window_location(
+						Point { (uint16_t) (0        ), (uint16_t) (0       ) },
+						Point { (uint16_t) (height -1), (uint16_t) (width -1) });
 					break;
 			}
 
@@ -171,21 +167,21 @@ namespace Lib
 			Point point_upper_left;
 			Point point_lower_right;
 
-			point_upper_left .x = MIN(point0.x, point0.x);
-			point_lower_right.x = MAX(point1.x, point1.x);
-			point_upper_left .y = MIN(point0.y, point0.y);
-			point_lower_right.y = MAX(point1.y, point1.y);
+			point_upper_left .x = MIN(point1.x, point0.x);
+			point_lower_right.x = MAX(point1.x, point0.x);
+			point_upper_left .y = MIN(point1.y, point0.y);
+			point_lower_right.y = MAX(point1.y, point0.y);
 
-			point_upper_left .x = MIN(point_upper_left .x, m_width  - 1);
-			point_lower_right.x = MIN(point_lower_right.x, m_width  - 1);
-			point_upper_left .y = MIN(point_upper_left .y, m_height - 1);
-			point_lower_right.y = MIN(point_lower_right.y, m_height - 1);
+			point_upper_left .x = MIN(point_upper_left .x, width  - 1);
+			point_lower_right.x = MIN(point_lower_right.x, width  - 1);
+			point_upper_left .y = MIN(point_upper_left .y, height - 1);
+			point_lower_right.y = MIN(point_lower_right.y, height - 1);
 
 			uint32_t pixels_to_color =
 				((point_lower_right.x + 1) - point_upper_left.x) *
 				((point_lower_right.y + 1) - point_upper_left.y);
 
-			window_location(point_upper_left, point_lower_right);
+			set_window_location(point_upper_left, point_lower_right);
 
 			while (pixels_to_color--) send(color);
 		}
