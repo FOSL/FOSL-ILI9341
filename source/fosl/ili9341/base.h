@@ -3,7 +3,8 @@
 
 #include <fosl/util.h>
 
-#include "fosl/ili9341/defs.h"
+#include "fosl/ili9341/commands.h"
+#include "fosl/ili9341/rotations.h"
 #include "fosl/ili9341/color.h"
 #include "fosl/ili9341/point.h"
 

@@ -1,5 +1,5 @@
-#ifndef _FOSL_ILI9341_DEFS_H_
-#define _FOSL_ILI9341_DEFS_H_
+#ifndef _FOSL_ILI9341_COMMANDS_H_
+#define _FOSL_ILI9341_COMMANDS_H_
 
 namespace fosl
 {
@@ -50,13 +50,6 @@ namespace fosl
 			MADCTL_RGB        = 0x00,
 			MADCTL_BGR        = 0x08,
 			MADCTL_MH         = 0x04,
-		};
-		enum class ROTATION : uint16_t
-		{
-			PORTRAIT,
-			LANDSCAPE,
-			REVERSE_PORTRAIT,
-			REVERSE_LANDSCAPE,
 		};
 	}
 }
