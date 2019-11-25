@@ -1,3 +1,11 @@
-# fosl-ili9341
+# FOSL-ILI9341
 
-Base class for a-Si TFT LCD Single Chip Driver 240RGBx320 Resolution and 262K color.
+## Description
+
+Base class for: a-Si TFT LCD Single Chip Driver 240RGBx320 Resolution and 262K color.
+
+## Dependencies
+
+* [FOSL-Utilities]
+
+[FOSL-Utilities]: https://github.com/martinmake/FOSL-Utilities

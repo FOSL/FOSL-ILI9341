@@ -1,9 +1,9 @@
-#ifndef _FOSL_ILI9341_ROTATIONS_H_
-#define _FOSL_ILI9341_ROTATIONS_H_
+#ifndef _FOSL_ILI9341_ROTATION_HPP_
+#define _FOSL_ILI9341_ROTATION_HPP_
 
-namespace fosl
+namespace FOSL
 {
-	namespace Ili9341
+	namespace ILI9341
 	{
 		enum class ROTATION : uint8_t
 		{

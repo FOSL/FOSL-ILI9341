@@ -1,10 +1,12 @@
-#ifndef _FOSL_ILI9341_COLOR_H_
-#define _FOSL_ILI9341_COLOR_H_
+#ifndef _FOSL_ILI9341_COLOR_HPP_
+#define _FOSL_ILI9341_COLOR_HPP_
 
-namespace fosl
+namespace FOSL
 {
-	namespace Ili9341
+	namespace ILI9341
 	{
+		// TODO: Make more generic
+
 		struct Color
 		{
 			unsigned int b : 5;

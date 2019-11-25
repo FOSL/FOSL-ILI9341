@@ -1,22 +1,40 @@
-#include "fosl/ili9341/base.h"
+#include "FOSL/ILI9341/Base.hpp"
 
-namespace fosl
+namespace FOSL
 {
-	namespace Ili9341
+	namespace ILI9341
 	{
+		// CONSTRUCTORS
 		Base::Base(uint16_t width, uint16_t height)
-			: width(width), height(height)
+			: WIDTH(width), HEIGHT(height)
 		{
 		}
 
-		void Base::set_rotation(ROTATION new_rotation)
+		// SETTERS
+		void Base::set_window_location(Point point, Size size)
+		{
+			send(COMMAND::COLUMN_ADDR);
+			send(((point.x         ) >> 8) & 0xFF);
+			send(((point.x         ) >> 0) & 0xFF);
+			send(((point.x + size.x) >> 8) & 0xFF);
+			send(((point.x + size.x) >> 0) & 0xFF);
+
+			send(COMMAND::PAGE_ADDR);
+			send(((point.y         ) >> 8) & 0xFF);
+			send(((point.y         ) >> 0) & 0xFF);
+			send(((point.y + size.y) >> 8) & 0xFF);
+			send(((point.y + size.y) >> 0) & 0xFF);
+
+			send(COMMAND::GRAM);
+		}
+		void Base::set(ROTATION rotation)
 		{
 			static const uint8_t MY  = 0b10000000;
 			static const uint8_t MX  = 0b01000000;
 			static const uint8_t MV  = 0b00100000;
 			static const uint8_t BGR = 0b00001000;
 
-			rotation = new_rotation;
+			rotation = rotation;
 
 			send(COMMAND::MAC);
 			switch(rotation)
@@ -35,35 +53,8 @@ namespace fosl
 					break;
 			}
 		}
-		void Base::set_window_location(const Point& point0, const Point& point1)
-		{
-			Point point_upper_left;
-			Point point_lower_right;
 
-			point_upper_left .x = MIN(point0.x, point1.x);
-			point_lower_right.x = MAX(point0.x, point1.x);
-			point_upper_left .y = MIN(point0.y, point1.y);
-			point_lower_right.y = MAX(point0.y, point1.y);
-
-			point_upper_left .x = MIN(point_upper_left .x, width  - 1);
-			point_lower_right.x = MIN(point_lower_right.x, width  - 1);
-			point_upper_left .y = MIN(point_upper_left .y, height - 1);
-			point_lower_right.y = MIN(point_lower_right.y, height - 1);
-
-			send(COMMAND::COLUMN_ADDR);
-			send(HIGH_BYTE(point_upper_left .x));
-			send( LOW_BYTE(point_upper_left .x));
-			send(HIGH_BYTE(point_lower_right.x));
-			send( LOW_BYTE(point_lower_right.x));
-
-			send(COMMAND::PAGE_ADDR);
-			send(HIGH_BYTE(point_upper_left .y));
-			send( LOW_BYTE(point_upper_left .y));
-			send(HIGH_BYTE(point_lower_right.y));
-			send( LOW_BYTE(point_lower_right.y));
-
-			send(COMMAND::GRAM);
-		}
+		// METHODS
 		void Base::initialize(void)
 		{
 			send(COMMAND::RESET);
@@ -73,40 +64,28 @@ namespace fosl
 			send(COMMAND::DISPLAY_ON);
 			delay_ms(200);
 
-			//------------power control------------------------------
-			send(COMMAND::POWER1); // power control
+			// POWER CONTROL
+			send(COMMAND::POWER1);
 			send(0x26); // GVDD = 4.75v
-			send(COMMAND::POWER2); // power control
+			send(COMMAND::POWER2);
 			send(0x11); // AVDD=VCIx2, VGH=VCIx7, VGL=-VCIx3
 
-			//--------------VCOM-------------------------------------
-			send(COMMAND::VCOM1); // vcom control
+			// VCOM
+			send(COMMAND::VCOM1);
 			send(0x35); // Set the VCOMH voltage (0x35 = 4.025v)
-			send(0x3e); // Set the VCOML voltage (0x3E = -0.950v)
-			send(COMMAND::VCOM2); // vcom control
-			send(0xbe);
+			send(0x3E); // Set the VCOML voltage (0x3E = -0.950v)
+			send(COMMAND::VCOM2);
+			send(0xBE);
 
-			//------------memory access control------------------------
-			send(COMMAND::MAC); // memory access control
+			// MEMORY ACCESS CONTROL
+			send(COMMAND::MAC);
 			send(0x48);
-
 			send(COMMAND::PIXEL_FORMAT);
 			send(0x55); // 16bit/pixel
-
 			send(COMMAND::FRC);
 			send(0x1F);
 
-			//-------------ddram ----------------------------
-			send(COMMAND::COLUMN_ADDR);
-			send(HIGH_BYTE(0x0000));
-			send( LOW_BYTE(0x0000));
-			send(HIGH_BYTE(0x00EF));
-			send( LOW_BYTE(0x00EF));
-			send(COMMAND::PAGE_ADDR);
-			send(HIGH_BYTE(0x0000));
-			send( LOW_BYTE(0x0000));
-			send(HIGH_BYTE(0x013F));
-			send( LOW_BYTE(0x013F));
+			// DDRAM
 			send(COMMAND::TEARING_OFF);
 			send(COMMAND::DISPLAY_INVERSION);
 			send(COMMAND::ENTRY_MODE_SET);
@@ -115,7 +94,7 @@ namespace fosl
 			// Low voltage detection: Disable
 			send(0x07);
 
-			//-----------------display------------------------
+			// DISPLAY
 			// send(ILI9341_DFC); // display function control
 			// Set the scan mode in non-display area
 			// DeterMINe source/VCOM output in a non-display area in the partial display mode
@@ -131,18 +110,11 @@ namespace fosl
 
 			send(COMMAND::GRAM); // memory write
 			delay_ms(200);
-
-			fill(Color { 0, 0, 0 });
 		}
 
-		void Base::pixel(const Point& point, Color color)
-		{
-			set_window_location(point, point);
-			send(color);
-		}
 		void Base::fill(Color color)
 		{
-			uint32_t pixels_to_color = width * height;
+			uint32_t pixels_to_color = WIDTH * HEIGHT;
 
 			switch (rotation)
 			{
@@ -150,40 +122,41 @@ namespace fosl
 				case ROTATION::LANDSCAPE:
 					set_window_location(
 						Point { (uint16_t) (0        ), (uint16_t) (0         ) },
-						Point { (uint16_t) (width - 1), (uint16_t) (height - 1) });
+						Point { (uint16_t) (WIDTH - 1), (uint16_t) (HEIGHT - 1) });
 					break;
 				case ROTATION::REVERSE_PORTRAIT:
 				case ROTATION::REVERSE_LANDSCAPE:
 					set_window_location(
-						Point { (uint16_t) (0        ), (uint16_t) (0       ) },
-						Point { (uint16_t) (height -1), (uint16_t) (width -1) });
+						Point { (uint16_t) (0         ), (uint16_t) (0        ) },
+						Point { (uint16_t) (HEIGHT - 1), (uint16_t) (WIDTH - 1) });
 					break;
 			}
 
 			while (pixels_to_color--) send(color);
 		}
-		void Base::rectangle(const Point& point0, const Point& point1, Color color, bool fill)
+		void Base::draw_pixel(Point point, Color color)
 		{
-			Point point_upper_left;
-			Point point_lower_right;
+			set_window_location(point, point);
+			send(color);
+		}
+		void Base::draw_full_rectangle(
+			const Point point,
+			const Size size,
+			Color color)
+		{
+			uint32_t pixels_to_color = size.x * size.y;
 
-			point_upper_left .x = MIN(point1.x, point0.x);
-			point_lower_right.x = MAX(point1.x, point0.x);
-			point_upper_left .y = MIN(point1.y, point0.y);
-			point_lower_right.y = MAX(point1.y, point0.y);
-
-			point_upper_left .x = MIN(point_upper_left .x, width  - 1);
-			point_lower_right.x = MIN(point_lower_right.x, width  - 1);
-			point_upper_left .y = MIN(point_upper_left .y, height - 1);
-			point_lower_right.y = MIN(point_lower_right.y, height - 1);
-
-			uint32_t pixels_to_color =
-				((point_lower_right.x + 1) - point_upper_left.x) *
-				((point_lower_right.y + 1) - point_upper_left.y);
-
-			set_window_location(point_upper_left, point_lower_right);
+			set_window_location(point, size);
 
 			while (pixels_to_color--) send(color);
+		}
+		void Base::draw_buffer(Point point, Point size, const Color* data)
+		{
+			uint32_t pixels_to_color = size.x * size.y;
+
+			set_window_location(point, size);
+
+			while (pixels_to_color--) send(*data++);
 		}
 	}
 }
@@ -484,50 +457,6 @@ void ILI9341_printText(char text[], int16_t x, int16_t y, uint16_t color, uint16
 	for(uint16_t i=0; i<40 && text[i]!=NULL; i++)
 	{
 		ILI9341_drawChar(x+(offset*i), y, text[i],color,bg,size);
-	}
-}
-
-//12. Image print (RGB 565, 2 bytes per pixel)
-void ILI9341_printImage(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t *data, uint32_t size)
-{
-	uint32_t n = size;
-	ILI9341_SetCursorPosition(x, y, w+x-1, h+y-1);
-	for(uint32_t i=0; i<n ; i++)
-	{
-		send(data[i]);
-	}
-}
-
-//13. Set screen rotation
-void ILI9341_setRotation(uint8_t rotate)
-{
-	switch(rotate)
-	{
-		case 1:
-			rotationNum = 1;
-			send(ILI9341_MEMCONTROL);
-			send(ILI9341_MADCTL_MY | ILI9341_MADCTL_BGR);
-			break;
-		case 2:
-			rotationNum = 2;
-			send(ILI9341_MEMCONTROL);
-			send(ILI9341_MADCTL_MV | ILI9341_MADCTL_BGR);
-			break;
-		case 3:
-			rotationNum = 3;
-			send(ILI9341_MEMCONTROL);
-			send(ILI9341_MADCTL_MX | ILI9341_MADCTL_BGR);
-			break;
-		case 4:
-			rotationNum = 4;
-			send(ILI9341_MEMCONTROL);
-			send(ILI9341_MADCTL_MX | ILI9341_MADCTL_MY | ILI9341_MADCTL_MV | ILI9341_MADCTL_BGR);
-			break;
-		default:
-			rotationNum = 1;
-			send(ILI9341_MEMCONTROL);
-			send(ILI9341_MADCTL_MY | ILI9341_MADCTL_BGR);
-			break;
 	}
 }
 */

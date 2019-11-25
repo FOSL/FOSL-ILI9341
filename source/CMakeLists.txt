@@ -1,16 +1,15 @@
-project(fosl-ili9341)
+project(FOSL-ILI9341)
 
 add_library(
 	${PROJECT_NAME}
 
-	./fosl/ili9341.h
-	./fosl/ili9341/base.cpp
-	./fosl/ili9341/base.h
-	./fosl/ili9341/color.h
-	./fosl/ili9341/commands.h
-	./fosl/ili9341/rotations.h
-	# ./fosl/ili9341/font/example.h
-	./fosl/ili9341/point.h
+	./FOSL/ILI9341.hpp
+	./FOSL/ILI9341/Base.cpp
+	./FOSL/ILI9341/Base.hpp
+	./FOSL/ILI9341/Color.hpp
+	./FOSL/ILI9341/Point.hpp
+	./FOSL/ILI9341/COMMAND.hpp
+	./FOSL/ILI9341/ROTATION.hpp
 )
 
 target_include_directories(
@@ -22,5 +21,5 @@ target_include_directories(
 target_link_libraries(
 	${PROJECT_NAME}
 
-	fosl-util
+	FOSL-Utilities
 )
