@@ -4,7 +4,7 @@ add_library(
 	${PROJECT_NAME}
 
 	./FOSL/ILI9341.hpp
-	./FOSL/ILI9341/Base.cpp
+	./FOSL/ILI9341/Base-impl.hpp
 	./FOSL/ILI9341/Base.hpp
 	./FOSL/ILI9341/Color.hpp
 	./FOSL/ILI9341/Point.hpp

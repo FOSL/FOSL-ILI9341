@@ -5,16 +5,26 @@ namespace FOSL
 {
 	namespace ILI9341
 	{
-		// TODO: Make more generic
-
-		struct Color
+		namespace Color
 		{
-			unsigned int b : 5;
-			unsigned int g : 6;
-			unsigned int r : 5;
+			struct RGB565
+			{
+				unsigned int r : 5;
+				unsigned int g : 6;
+				unsigned int b : 5;
 
-			operator uint16_t() { return *((uint16_t*) this); }
-		};
+				inline operator uint16_t(void) { return *((uint16_t*) this); }
+			};
+
+			struct BGR565
+			{
+				unsigned int b : 5;
+				unsigned int g : 6;
+				unsigned int r : 5;
+
+				inline operator uint16_t(void) { return *((uint16_t*) this); }
+			};
+		}
 	}
 }
 
